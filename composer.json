@@ -1,0 +1,8 @@
+{
+    "require": {
+        "embed/embed": "~1.8"
+    },
+    "autoload": {
+        "classmap": ["adapters/"]
+    }
+}
