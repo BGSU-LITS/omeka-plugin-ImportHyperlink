@@ -255,7 +255,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         // Check that the URL was not a "link" type, and an image is available.
-        if ($embed->type == 'link' && $embed->image) {
+        if ($embed->type != 'link' && $embed->image) {
             // Delete all existing files for the item.
             foreach ($record->getFiles() as $file) {
                 $file->delete();
