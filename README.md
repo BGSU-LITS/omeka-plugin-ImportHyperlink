@@ -28,5 +28,10 @@ With the default settings, YouTube will generally provide a lower resolution ima
 
 [Embedly](http://embed.ly) - While all other means of determining embed code will be used first, a fallback to the Embedly service is also provided. To use this service, you will need to create an account and provide an API key.
 
+## Requirements
+Besides Omeka, required packages are installed via Composer. The following library is used:
+
+* [Embed](https://github.com/oscarotero/Embed/) - Retrieves data about a hyperlink, including embed code.
+
 ## Development
 This plugin was developed by the [Bowling Green State University Libraries](http://www.bgsu.edu/library.html). Development is [hosted on GitHub](https://github.com/BGSU-LITS/omeka-plugin-ImportHyperlink).
