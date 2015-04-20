@@ -29,6 +29,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Plugin filters.
      */
     protected $_filters = array(
+        'exhibit_attachment_markup',
         'addImportCheckboxToUrlElement' => array(
             'ElementInput', 'Item', ElementSet::ITEM_TYPE_NAME, 'URL'
         )
@@ -269,6 +270,38 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
                 array('ignore_invalid_files' => false)
             );
         }
+    }
+
+    /**
+     * Filters Exhibits to display Hyperlink content for attachments.
+     *
+     * @param string $html HTML of the attachment.
+     * @param array $args Provides attachment and forceImage.
+     *
+     * @return string HTML of the attachment.
+     */
+    public function filterExhibitAttachmentMarkup($html, $args)
+    {
+        $attachment = $args['attachment'];
+
+        // If an image is not being forced, attempt to get the content.
+        if (!$args['forceImage']) {
+            $item = $attachment->getItem();
+
+            if ($item) {
+                $data = metadata(
+                    $attachment->getItem(),
+                    array(ElementSet::ITEM_TYPE_NAME, 'Content')
+                );
+            }
+        }
+
+        // If we got content, set the HTML as the content with a caption.
+        if (!empty($data)) {
+            $html = $data. get_view()->exhibitAttachmentCaption($attachment);
+        }
+
+        return $html;
     }
 
     /**
