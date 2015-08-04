@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "hash": "fb8db75644a82d88aebda1628168d68f",
     "packages": [
         {
             "name": "embed/embed",
-            "version": "v1.8.2",
+            "version": "v1.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/oscarotero/Embed.git",
-                "reference": "925fe799a54ad5f60b948cd5f2b46547c6c38f1c"
+                "reference": "0b2425a9f31e6ac700868a31a0ec81d814553762"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oscarotero/Embed/zipball/925fe799a54ad5f60b948cd5f2b46547c6c38f1c",
-                "reference": "925fe799a54ad5f60b948cd5f2b46547c6c38f1c",
+                "url": "https://api.github.com/repos/oscarotero/Embed/zipball/0b2425a9f31e6ac700868a31a0ec81d814553762",
+                "reference": "0b2425a9f31e6ac700868a31a0ec81d814553762",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
                 "opengraph",
                 "twitter cards"
             ],
-            "time": "2015-01-08 23:28:24"
+            "time": "2015-01-22 12:01:19"
         }
     ],
     "packages-dev": [],
