@@ -29,7 +29,7 @@ class Nbclearn extends Webpage implements AdapterInterface
     public static function check(Request $request)
     {
         return $request->match(array(
-            'http://highered.nbclearn.com/*'
+            'https?://highered.nbclearn.com/*'
         ));
     }
 
