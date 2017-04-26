@@ -29,7 +29,7 @@ class Nbclearn extends Webpage implements AdapterInterface
     public static function check(Request $request)
     {
         return $request->match(array(
-            'http://highered.nbclearn.com/*'
+            'https?://highered.nbclearn.com/*'
         ));
     }
 
@@ -61,7 +61,7 @@ class Nbclearn extends Webpage implements AdapterInterface
                 ? $this->options['nbclearnToken']
                 : 'X';
 
-            $url = 'http://highered.nbclearn.com/portal/site/root/widget/'.
+            $url = 'https://highered.nbclearn.com/portal/site/root/widget/'.
                 $token. '/'. $matches[1];
 
             return Viewers::iframe($url, $this->width, $this->height);
