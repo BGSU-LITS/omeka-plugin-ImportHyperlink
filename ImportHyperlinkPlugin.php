@@ -229,7 +229,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
             // Store the embed code as the Content if available.
             if ($embed->code) {
                 $texts[ElementSet::ITEM_TYPE_NAME]['Content'][] = array(
-                    'text' => $embed->code,
+                    'text' => preg_replace('{https?://}', '//', $embed->code),
                     'html' => true
                 );
             }
