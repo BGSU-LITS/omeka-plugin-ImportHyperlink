@@ -174,9 +174,14 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
         // Create an array of element texts for the item.
         $texts = array();
 
+        // Create a dispatcher that doesn't verify peers.
+        $dispatcher = new Embed\Http\CurlDispatcher([
+            CURLOPT_SSLVERSION => 6
+        ]);
+
         foreach ($urls as $url) {
             // Get the embed object for each URL provided.
-            $embed = Embed\Embed::create($url, $options);
+            $embed = Embed\Embed::create($url, $options, $dispatcher);
 
             // Store the Title and Description if available.
             if ($embed->title) {
