@@ -1,7 +1,7 @@
 # omeka-plugin-ImportHyperlink
-Omeka plugin to import details about a Hyperlink including embed code. Information is obtained via the OEmbed protocol and other forms of structured data.
+Omeka plugin to import details about a hyperlink including embed code. Information is obtained via the OEmbed protocol and other forms of structured data.
 
-When editing an item of the Hyperlink type, and checkbox labeled Import will be provided underneath the URL element. When the item is saved and the checkbox is checked, information about the URL will be loaded into the Dublin Core Title, Description and Publisher elements. If available, the embed code will be loaded into a new item type element named Content. A representative image may also be loaded as an file for the item.
+To use this plugin, you must add two elements to an Item Type: URL and Content. After creating an Item of that type, you can enter a URL into the URL field, and choose the Import checkbox. When the item is saved and the checkbox is checked, information about the URL will be loaded into the Dublin Core Title, Description and Publisher elements. If available, the embed code will be loaded into Content. A representative image may also be loaded as an file for the item.
 
 **Note:** Any existing information from the elements listed above, as well as files assigned to the item, will be replaced upon import.
 
@@ -24,7 +24,7 @@ If the URL provided represents media, a representative image for that media will
 With the default settings, YouTube will generally provide a lower resolution image that is letterboxed to an aspect ratio of 4x3. By specifying a minimum width above 480, a minimum height above 360, or choosing the use largest image option, you will frequently receive a higher resolution image in the video's aspect ratio.
 
 ### Services
-[NBC Learn](http://nbclearn.com) - Embedding NBC Learn videos is not officially supported by NBC Learn. If a token is not specified, the embedded video will only allow 15 seconds to be played. The best way to determine the token is to use your learning mangement system (LMS). Use your LMS to embed a video from NBC learn, and then inspect the resulting element. In the src attribute for the iframe element, your token is the text that appears after widget/ up to but not including the next forward slash and trailing number.
+[NBC Learn](http://nbclearn.com) - Embedding NBC Learn videos is not officially supported by NBC Learn. If a token is not specified, the embedded video will only allow 15 seconds to be played. The best way to determine the token is to use your learning management system (LMS). Use your LMS to embed a video from NBC learn, and then inspect the resulting element. In the src attribute for the iframe element, your token is the text that appears after `widget/` up to but not including the next forward slash and trailing number.
 
 [Embedly](http://embed.ly) - While all other means of determining embed code will be used first, a fallback to the Embedly service is also provided. To use this service, you will need to create an account and provide an API key.
 

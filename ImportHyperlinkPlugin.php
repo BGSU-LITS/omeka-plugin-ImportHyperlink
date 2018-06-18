@@ -3,7 +3,7 @@
  * Omeka Import Hyperlink Plugin
  *
  * @author John Kloor <kloor@bgsu.edu>
- * @copyright 2015 Bowling Green State University Libraries
+ * @copyright 2018 Bowling Green State University Libraries
  * @license MIT
  */
 
@@ -20,6 +20,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_hooks = array(
         'install',
         'uninstall',
+        'upgrade',
         'config',
         'config_form',
         'after_save_item'
@@ -39,11 +40,11 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Plugin options.
      */
     protected $_options = array(
-        'import_hyperlink_minImageWidth' => 0,
-        'import_hyperlink_minImageHeight' => 0,
-        'import_hyperlink_getBiggerImage' => false,
-        'import_hyperlink_embedlyKey' => '',
-        'import_hyperlink_nbclearnToken' => ''
+        'import_hyperlink_min_image_width' => 0,
+        'import_hyperlink_min_image_height' => 0,
+        'import_hyperlink_choose_bigger_image' => false,
+        'import_hyperlink_embedly_key' => '',
+        'import_hyperlink_nbclearn_token' => ''
     );
 
     /**
@@ -60,37 +61,12 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
     /**
      * Hook to plugin installation.
      *
-     * Creates a Content element for the Hyperlink item type. If the Hyperlink
-     * item type does not exist, it is also created with an URL element.
-     *
-     * Note: The element and item type are not removed during uninstallation of
-     * the plugin to preserve any information that was already loaded.
+     * Installs the options for the plugin.
      */
     public function hookInstall()
     {
         // Install options.
         $this->_installOptions();
-
-        // Do nothing if the Content element already exists.
-        if (element_exists(ElementSet::ITEM_TYPE_NAME, 'Content')) {
-            return;
-        }
-
-        // Create a Hyperlink item type if it does not already exist.
-        $itemType = get_db()->getTable('ItemType')->findByName('Hyperlink');
-
-        if (empty($itemType)) {
-            $itemType = new ItemType();
-            $itemType->name = 'Hyperlink';
-            $itemType->description =
-                'A link, or reference, to another resource on the Internet.';
-
-            $itemType->addElements(array(array('name' => 'URL')));
-        }
-
-        // Add Content element, and save item type.
-        $itemType->addElements(array(array('name' => 'Content')));
-        $itemType->save();
     }
 
     /**
@@ -114,6 +90,36 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
             if (isset($args['post'][$option])) {
                 set_option($option, $args['post'][$option]);
             }
+        }
+    }
+
+    /**
+     * Hook to plugin upgrade.
+     *
+     * Upgrades the options for the plugin.
+     */
+    public function hookUpgrade($args)
+    {
+        if (version_compare($args['old_version'], '2.0', '<')) {
+            $options = array(
+                'import_hyperlink_min_image_width' =>
+                    'import_hyperlink_minImageWidth',
+                'import_hyperlink_min_image_height' =>
+                    'import_hyperlink_minImageHeight',
+                'import_hyperlink_choose_bigger_image' =>
+                    'import_hyperlink_getBiggerImage',
+                'import_hyperlink_embedly_key' =>
+                    'import_hyperlink_embedlyKey',
+                'import_hyperlink_nbclearn_token' =>
+                    'import_hyperlink_nbclearnToken'
+            );
+
+            foreach ($options as $key => $value) {
+                $this->_options[$key] = get_option($value);
+                delete_option($value);
+            }
+
+            $this->_installOptions();
         }
     }
 
@@ -152,7 +158,10 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         // Get options for the Embed class.
-        $options = array();
+        $options = array(
+            'custom_adapters_namespace' => 'ImportHyperlink\\'
+        );
+
         $preg = '/^import_hyperlink_/';
 
         foreach (array_keys($this->_options) as $option) {
@@ -255,7 +264,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
 
-        // Check that the URL was not a "link" type, and an image is available.  
+        // Check that the URL was not a "link" type, and an image is available.
         if (!empty($embed) && $embed->type != 'link' && $embed->image) {
             // Delete all existing files for the item.
             foreach ($record->getFiles() as $file) {

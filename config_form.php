@@ -5,7 +5,7 @@
  * Outputs the configuration form for the config_form hook.
  *
  * @author John Kloor <kloor@bgsu.edu>
- * @copyright 2015 Bowling Green State University Libraries
+ * @copyright 2018 Bowling Green State University Libraries
  * @license MIT
  * @package Import Hyperlink
  */
@@ -13,7 +13,7 @@
 $sections = array(
     'Images' => array(
         array(
-            'name' => 'import_hyperlink_minImageWidth',
+            'name' => 'import_hyperlink_min_image_width',
             'label' => __('Minimum Image Width'),
             'explanation' => __(
                 'When choosing an image to represent the hyperlink, the image'.
@@ -21,7 +21,7 @@ $sections = array(
             )
         ),
         array(
-            'name' => 'import_hyperlink_minImageHeight',
+            'name' => 'import_hyperlink_min_image_height',
             'label' => __('Minimum Image Height'),
             'explanation' => __(
                 'When choosing an image to represent the hyperlink, the image'.
@@ -29,7 +29,7 @@ $sections = array(
             )
         ),
         array(
-            'name' => 'import_hyperlink_getBiggerImage',
+            'name' => 'import_hyperlink_choose_bigger_image',
             'label' => __('Use Largest Image'),
             'checkbox' => true,
             'explanation' => __(
@@ -41,7 +41,7 @@ $sections = array(
     ),
     'Services' => array(
         array(
-            'name' => 'import_hyperlink_embedlyKey',
+            'name' => 'import_hyperlink_embedly_key',
             'label' => __('Embedly API Key'),
             'explanation' => __(
                 'If provided, Embedly will be used as a fallback service if'.
@@ -49,7 +49,7 @@ $sections = array(
             )
         ),
         array(
-            'name' => 'import_hyperlink_nbclearnToken',
+            'name' => 'import_hyperlink_nbclearn_token',
             'label' => __('NBC Learn Token'),
             'explanation' => __(
                 'Must be provided to embed full NBC Learn videos. The token'.

@@ -3,80 +3,81 @@
  * Omeka Import Hyperlink Plugin: NBC Learn Embed Adapter
  *
  * @author John Kloor <kloor@bgsu.edu>
- * @copyright 2015 Bowling Green State University Libraries
+ * @copyright 2018 Bowling Green State University Libraries
  * @license MIT
  */
 
-namespace Embed\Adapters;
-
-use Embed\Request;
-use Embed\Viewers;
+namespace ImportHyperlink;
 
 /**
  * Omeka Import Hyperlink Plugin: NBC Learn Embed Adapter Plugin Class
  *
  * @package Import Hyperlink
  */
-class Nbclearn extends Webpage implements AdapterInterface
+class Nbclearn extends \Embed\Adapters\Webpage
 {
     /**
-     * Checks whether the request is valid to this Adapter
-     *
-     * @param Request $request
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
-    public static function check(Request $request)
+    public static function check(\Embed\Http\Response $response)
     {
-        return $request->match(array(
-            'https?://highered.nbclearn.com/*'
+        return $response->isValid() && $response->getUrl()->match(array(
+            'highered.nbclearn.com/*'
         ));
     }
 
     /**
-     * Gets the type of the url
-     * The types are the same than the oEmbed types:
-     * video, photo, link, rich
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
-    public function getType()
+    protected function init()
     {
-        return 'video';
+        // If available, load the flat view to get the correct image.
+        $url = $this->getResponse()->getStartingUrl();
+
+        if (preg_match('/[?&]cuecard=(\w+)/', $url, $matches)) {
+            // Only use a token if one is available.
+            $token = $this->options['nbclearn_token']
+                ? '&token='. $this->options['nbclearn_token']
+                : '';
+
+            $url = \Embed\Http\Url::create(
+                'http://highered.nbclearn.com/portal/site/HigherEd/flatview'.
+                '?cuecard='. $matches[1]. $token
+            );
+
+            $this->response = $this->getDispatcher()->dispatch($url);
+        }
+
+        parent::init();
     }
 
     /**
-     * Gets the embed code
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getCode()
     {
         // A cuecard ID is needed to embed an iframe.
-        $url = $this->getUrl();
-
-        if (preg_match('/[?&]cuecard=(\w+)/', $url, $matches)) {
+        if (preg_match('/[?&]cuecard=(\w+)/', $this->url, $matches)) {
             // Default to a fake token if a real one is not available:
-            $token = $this->options['nbclearnToken']
-                ? $this->options['nbclearnToken']
+            $token = $this->options['nbclearn_token']
+                ? $this->options['nbclearn_token']
                 : 'X';
 
             $url = 'https://highered.nbclearn.com/portal/site/root/widget/'.
                 $token. '/'. $matches[1];
 
-            return Viewers::iframe($url, $this->width, $this->height);
+            return \Embed\Utils::iframe($url, $this->width, $this->height);
         }
 
         return parent::getCode();
     }
 
     /**
-     * Gets the canonical url
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getUrl()
     {
+        // Canonicalize the URL to the regular website.
         $url = parent::getUrl();
 
         if (preg_match('/[?&]cuecard=(\w+)/', $url, $matches)) {
@@ -88,29 +89,7 @@ class Nbclearn extends Webpage implements AdapterInterface
     }
 
     /**
-     * Gets the provider name
-     *
-     * @return string|null
-     */
-    public function getProviderName()
-    {
-        return 'NBC Learn';
-    }
-
-    /**
-     * Gets the provider url (usually the home url of the link)
-     *
-     * @return string|null
-     */
-    public function getProviderUrl()
-    {
-        return 'http://highered.nbclearn.com';
-    }
-
-    /**
-     * Gets the width of the embedded widget
-     *
-     * @return integer|null
+     * {@inheritdoc}
      */
     public function getWidth()
     {
@@ -118,38 +97,10 @@ class Nbclearn extends Webpage implements AdapterInterface
     }
 
     /**
-     * Gets the height of the embedded widget
-     *
-     * @return integer|null
+     * {@inheritdoc}
      */
     public function getHeight()
     {
         return 390;
-    }
-
-    /**
-     * Initializes all providers used in this adapter (oembed, opengraph, etc)
-     *
-     * @param Request $request
-     */
-    protected function initProviders(Request $request)
-    {
-        // If possible, use the flatview instead, as it has the right image.
-        $url = $request->url->getUrl();
-
-        if (preg_match('/[?&]cuecard=(\w+)/', $url, $matches)) {
-            // Only use a token if one is available.
-            $token = $this->options['nbclearnToken']
-                ? '&token='. $this->options['nbclearnToken']
-                : '';
-
-            $url =
-                'http://highered.nbclearn.com/portal/site/HigherEd/flatview'.
-                '?cuecard='. $matches[1]. $token;
-
-            $request = $request->createRequest($url);
-        }
-
-        parent::initProviders($request);
     }
 }
