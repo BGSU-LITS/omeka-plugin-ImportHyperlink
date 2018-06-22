@@ -280,7 +280,19 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
             insert_files_for_item(
                 $record,
                 'Url',
-                array($embed->image),
+                array(
+                    'source' => $embed->image,
+                    'metadata' => array(
+                        'Dublin Core' => array(
+                            'Source' => array(
+                                array(
+                                    'text' => $embed->url ? $embed->url : $url,
+                                    'html' => false
+                                )
+                            )
+                        )
+                    )
+                ),
                 array('ignore_invalid_files' => false)
             );
         }
