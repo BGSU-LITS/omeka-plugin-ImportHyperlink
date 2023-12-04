@@ -18,11 +18,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Plugin hooks.
      */
     protected $_hooks = array(
-        'install',
-        'uninstall',
         'upgrade',
-        'config',
-        'config_form',
         'after_save_item'
     );
 
@@ -37,17 +33,6 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
     );
 
     /**
-     * @var array Plugin options.
-     */
-    protected $_options = array(
-        'import_hyperlink_min_image_width' => 0,
-        'import_hyperlink_min_image_height' => 0,
-        'import_hyperlink_choose_bigger_image' => false,
-        'import_hyperlink_embedly_key' => '',
-        'import_hyperlink_nbclearn_token' => ''
-    );
-
-    /**
      * Plugin constructor.
      *
      * Requires class autoloader, and calls parent constructor.
@@ -59,41 +44,6 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
-     * Hook to plugin installation.
-     *
-     * Installs the options for the plugin.
-     */
-    public function hookInstall()
-    {
-        // Install options.
-        $this->_installOptions();
-    }
-
-    /**
-     * Hook to plugin uninstallation.
-     *
-     * Uninstalls the options for the plugin.
-     */
-    public function hookUninstall()
-    {
-        $this->_uninstallOptions();
-    }
-
-    /**
-     * Hook to plugin configuration form submission.
-     *
-     * Sets options submitted by the configuration form.
-     */
-    public function hookConfig($args)
-    {
-        foreach (array_keys($this->_options) as $option) {
-            if (isset($args['post'][$option])) {
-                set_option($option, $args['post'][$option]);
-            }
-        }
-    }
-
-    /**
      * Hook to plugin upgrade.
      *
      * Upgrades the options for the plugin.
@@ -102,35 +52,33 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
     {
         if (version_compare($args['old_version'], '2.0', '<')) {
             $options = array(
-                'import_hyperlink_min_image_width' =>
-                    'import_hyperlink_minImageWidth',
-                'import_hyperlink_min_image_height' =>
-                    'import_hyperlink_minImageHeight',
-                'import_hyperlink_choose_bigger_image' =>
-                    'import_hyperlink_getBiggerImage',
-                'import_hyperlink_embedly_key' =>
-                    'import_hyperlink_embedlyKey',
-                'import_hyperlink_nbclearn_token' =>
-                    'import_hyperlink_nbclearnToken'
+                'import_hyperlink_minImageWidth',
+                'import_hyperlink_minImageHeight',
+                'import_hyperlink_getBiggerImage',
+                'import_hyperlink_embedlyKey',
+                'import_hyperlink_nbclearnToken'
             );
 
-            foreach ($options as $key => $value) {
-                $this->_options[$key] = get_option($value);
+            foreach ($options as $value) {
                 delete_option($value);
             }
 
-            $this->_installOptions();
+            return;
         }
-    }
 
-    /**
-     * Hook to output plugin configuration form.
-     *
-     * Include form from config_form.php file.
-     */
-    public function hookConfigForm()
-    {
-        include 'config_form.php';
+        if (version_compare($args['old_version'], '3.0', '<')) {
+            $options = array(
+                'import_hyperlink_min_image_width',
+                'import_hyperlink_min_image_height',
+                'import_hyperlink_choose_bigger_image',
+                'import_hyperlink_embedly_key',
+                'import_hyperlink_nbclearn_token'
+            );
+
+            foreach ($options as $value) {
+                delete_option($value);
+            }
+        }
     }
 
     /**
@@ -157,31 +105,15 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
 
-        // Get options for the Embed class.
-        $options = array(
-            'custom_adapters_namespace' => 'ImportHyperlink\\'
-        );
-
-        $preg = '/^import_hyperlink_/';
-
-        foreach (array_keys($this->_options) as $option) {
-            if (preg_match($preg, $option)) {
-                $key = preg_replace($preg, '', $option);
-                $options[$key] = get_option($option);
-            }
-        }
-
         // Create an array of element texts for the item.
         $texts = array();
 
-        // Create a dispatcher that doesn't verify peers.
-        $dispatcher = new Embed\Http\CurlDispatcher([
-            CURLOPT_SSLVERSION => 6
-        ]);
+        // Create an embed client.
+        $client = new Embed\Embed();
 
         foreach ($urls as $url) {
             // Get the embed object for each URL provided.
-            $embed = Embed\Embed::create($url, $options, $dispatcher);
+            $embed = $client->get($url);
 
             // Store the Title and Description if available.
             if ($embed->title) {
@@ -216,7 +148,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
             }
 
             // Store the Publisher name, and link to their URL if available.
-            if ($embed->type != 'link' && $embed->providerName) {
+            if ($embed->code && $embed->providerName) {
                 if ($embed->providerUrl) {
                     $texts['Dublin Core']['Publisher'][] = array(
                         'text' =>
@@ -270,7 +202,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         // Check that the URL was not a "link" type, and an image is available.
-        if (!empty($embed) && $embed->type != 'link' && $embed->image) {
+        if (!empty($embed) && $embed->code && $embed->image) {
             // Delete all existing files for the item.
             foreach ($record->getFiles() as $file) {
                 $file->delete();
@@ -281,7 +213,7 @@ class ImportHyperlinkPlugin extends Omeka_Plugin_AbstractPlugin
                 $record,
                 'Url',
                 array(
-                    'source' => $embed->image,
+                    'source' => (string) $embed->image,
                     'metadata' => array(
                         'Dublin Core' => array(
                             'Source' => array(
